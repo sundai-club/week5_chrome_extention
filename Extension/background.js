@@ -1,41 +1,19 @@
-function injectedFunction(extensionId) {
-    if(!window.injected) {
-        if (window.trustedTypes && window.trustedTypes.createPolicy) { // Check if Trusted Types is supported
-            window.policy = window.trustedTypes.createPolicy('myExtensionPolicy', {
-                createScriptURL: (url) => url // Implement a policy for creating trusted script URLs
-            });
-        }
-        
-        console.log('Starting injection');
-        var a = document.createElement('script');
+const debug = true;
 
-        var trustedScriptURLA = window.policy.createScriptURL(`chrome-extension://${extensionId}/vendor/env.js`);
-        a.setAttribute('src', trustedScriptURLA);
-        a.setAttribute('data-become-waifu', "1");
-        a.setAttribute('data-runtime-id', `${extensionId}`);
-        console.log(`chrome-extension://${extensionId}/vendor/env.js`)
-        document.body.appendChild(a);
-        
-        console.log('Looks like its injected');
-        window.injected = true;
-    } else {
-        console.log('Can not inject');
-    }
+function sendMessageToContentScript(message) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, message);
+    });
 }
 
-chrome.action.onClicked.addListener(function (tab) {
-    if(!tab.id) {
-        console.log('No tab id');
-        return;
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.type === "toggleState") {
+        chrome.storage.sync.set({'extensionEnabled': request.enabled});
+        sendMessageToContentScript({type: "toggleState", enabled: request.enabled});
+        if (debug) console.log('background: Extension state changed to', request.enabled);
+    } else if (request.type === "changeMask") {
+        chrome.storage.sync.set({'currentMaskId': request.maskId});
+        sendMessageToContentScript({type: "changeMask", maskId: request.maskId});
+        if (debug) console.log('background: Mask changed to', request.maskId);
     }
-
-    console.log('Initiating Injection');
-    chrome.scripting.executeScript({
-        target: {
-        tabId: tab.id,
-    },
-    world: 'MAIN',
-    func: injectedFunction,
-    args: [chrome.runtime.id]
-    });
 });
