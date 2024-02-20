@@ -1,4 +1,3 @@
-const debug = true;
 if (debug) console.log("contentScript.js is running");
 
 // 1. Set up the global variables

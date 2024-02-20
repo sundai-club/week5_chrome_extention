@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         maskItem.classList.add('mask-item');
         maskItem.id = mask_id;
         const img = document.createElement('img');
-        img.src = "images/filter_images/" + filter.image;
+        img.src = "data/filter_icons/" + filter.image;
         maskItem.appendChild(img);
 
         // Add a name under

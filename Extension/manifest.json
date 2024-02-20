@@ -9,8 +9,14 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["filters.js", "contentHelpers.js", "contentScript.js"],
+      "js": ["contentHelpers.js", "filters.js", "contentScript.js"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["data/frames/*"],
+      "matches": ["<all_urls>"]
     }
   ],
   "permissions": [
@@ -24,17 +30,17 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "/images/logo.png",
-      "32": "/images/logo.png",
-      "48": "/images/logo.png",
-      "128": "/images/logo.png" 
+      "16": "data/logo.png",
+      "32": "data/logo.png",
+      "48": "data/logo.png",
+      "128": "data/logo.png" 
     }
   },
   "icons": {
-    "16": "images/logo.png",
-    "32": "images/logo.png",
-    "48": "images/logo.png",
-    "128": "/images/logo.png"
+    "16": "data/logo.png",
+    "32": "data/logo.png",
+    "48": "data/logo.png",
+    "128": "data/logo.png"
   },
   "options_page": "options.html"
 }

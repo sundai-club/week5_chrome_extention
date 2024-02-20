@@ -1,3 +1,26 @@
+const debug = true;
+
+
+
+async function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+let cachedImage = null;
+let cachedImageId = null;
+async function getCachedImage(imageUrl) {
+    if (!cachedImage || cachedImageId !== imageUrl) {
+        cachedImage = await loadImage(imageUrl).catch(console.error);
+    }
+    cachedImageId = imageUrl;
+    return cachedImage;
+}
+
 function setCanvasSize(canvas, video, maxWidth=800) {
     // Ensure the video's metadata is loaded to get its natural dimensions
     if (video.readyState >= 1) {
