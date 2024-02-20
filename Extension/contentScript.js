@@ -11,6 +11,7 @@ chrome.storage.sync.get(['extensionEnabled', 'currentMaskId', 'currentMaskArgs']
     currentMaskArgs = result.currentMaskArgs || {};
 });
 
+
 // 2. Listen for messages from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "toggleState") {
@@ -26,6 +27,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // 3. Process each video
 
 function processOneVideo(video) {
+
+    // lib_url = chrome.runtime.getURL("src/thirdparty/mediapipe/face_mesh");
+    // facemesh = new FaceMesh({
+    //     locateFile: (file) => `${lib_url}/${file}`
+    // });
+    // // set facemesh config
+    // facemesh.setOptions({
+    //     maxNumFaces: 1,
+    //     refineLandmarks: true,
+    //     minDetectionConfidence: 0.5,
+    //     minTrackingConfidence: 0.5,
+    // });
+
+    // MEDIA_PIPE_LOADED = true;
+    // if (debug) console.log('MediaPipe components loaded.', facemesh);
+
+    console.log('injected?', window.libsInjected)
+
+
     let canvas = null;
 
     // 3.1 Delete or create canvas if video is present
@@ -75,7 +95,3 @@ function videoUpdateLoop() {
 }
 
 requestAnimationFrame(videoUpdateLoop); // Start the loop
-
-
-
-

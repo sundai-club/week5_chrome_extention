@@ -9,13 +9,20 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["contentHelpers.js", "filters.js", "contentScript.js"],
+      "js": [
+        "src/contentHelpers.js",
+        "src/filters/default.js",
+        "src/filters/distortion.js",
+        "src/filters/template_based.js",
+        "src/filters/main.js",
+        "contentScript.js"
+      ],
       "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["data/frames/*"],
+      "resources": ["src/thirdparty/mediapipe/face_mesh/*", "data/frames/*"],
       "matches": ["<all_urls>"]
     }
   ],
