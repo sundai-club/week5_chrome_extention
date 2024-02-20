@@ -13,7 +13,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if (debug) console.log('background: Extension state changed to', request.enabled);
     } else if (request.type === "changeMask") {
         chrome.storage.sync.set({'currentMaskId': request.maskId});
-        sendMessageToContentScript({type: "changeMask", maskId: request.maskId});
-        if (debug) console.log('background: Mask changed to', request.maskId);
+        chrome.storage.sync.set({'currentMaskArgs': request.args});
+        chrome.storage.sync.set({'selectedMaskGridID': request.gridId});
+        sendMessageToContentScript({type: "changeMask", maskId: request.maskId, args: request.args});
+        if (debug) console.log('background: Mask changed to', request.gridId, request.maskId, request.args);
     }
 });

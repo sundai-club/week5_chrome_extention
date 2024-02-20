@@ -3,11 +3,13 @@ if (debug) console.log("contentScript.js is running");
 
 // 1. Set up the global variables
 let extensionEnabled = false;
-let currentMaskFunction = 0;
+let currentMaskFunctionId = "default";
+let currentMaskArgs = {};
 
-chrome.storage.sync.get(['extensionEnabled', 'currentMaskId'], (result) => {
+chrome.storage.sync.get(['extensionEnabled', 'currentMaskId', 'currentMaskArgs'], (result) => {
     extensionEnabled = result.extensionEnabled || false;
-    currentMaskFunction = result.currentMaskId || 0;
+    currentMaskFunctionId = result.currentMaskId || "default";
+    currentMaskArgs = result.currentMaskArgs || {};
 });
 
 // 2. Listen for messages from the background script
@@ -16,7 +18,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         extensionEnabled = request.enabled;
         if (debug) console.log('content: Extension state changed to', extensionEnabled);
     } else if (request.type === "changeMask") {
-        currentMaskFunction = maskFuntions(request.maskId);
+        currentMaskFunctionId = request.maskId;
+        currentMaskArgs = request.args;
         if (debug) console.log('content: Mask changed to', request.maskId);
     }
 });
@@ -57,7 +60,7 @@ function processOneVideo(video) {
         }
         // 3.2 Apply effect only if the video is playing
         if (!video.paused && !video.ended) {
-            requestAnimationFrame(() => maskFuntions[currentMaskFunction](video, canvas));
+            requestAnimationFrame(() => maskFuntions[currentMaskFunctionId](video, canvas, currentMaskArgs));
         }
     } else if (canvasContainer && canvasContainer.classList.contains('video-canvas-container')) {
         // Remove the canvas container if the extension is disabled

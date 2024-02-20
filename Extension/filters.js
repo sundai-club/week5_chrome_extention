@@ -1,6 +1,9 @@
-const maskFuntions = [tresholdFilter];
+const maskFuntions = {
+    "default" : tresholdFilter,
+    "threshold" : tresholdFilter
+};
 
-function tresholdFilter(video, canvas) {
+function tresholdFilter(video, canvas, {threshold = [100, 100, 100]} = {}) {
     setCanvasSize(canvas, video);
     const width = canvas.width;
     const height = canvas.height;
@@ -11,7 +14,7 @@ function tresholdFilter(video, canvas) {
     const data = frame.data;
 
     for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 1] > 100 && data[i] > 100 && data[i + 2] > 100) {
+        if (data[i + 1] > threshold[0] && data[i] > threshold[1] && data[i + 2] > threshold[2]) {
             data[i] = data[i + 1] = data[i + 2] = 0;
         } else {
             data[i + 3] = 0; // Set alpha to 0
