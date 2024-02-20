@@ -1,5 +1,3 @@
-let extensionEnabled = false;
-
 document.addEventListener('DOMContentLoaded', function() {
     const maskOptions = [
         'images/filters_images/mask1.png', 
@@ -25,72 +23,19 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Extension ' + (isEnabled ? 'enabled' : 'disabled'));
         this.querySelector('.toggle-label').textContent = isEnabled ? 'ON' : 'OFF';
         chrome.storage.sync.set({'extensionEnabled': isEnabled}); // Save state
-        // Optionally, send a message to content script to enable/disable functionality
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {enabled: isEnabled});
-        });
-
-        extensionEnabled = isEnabled;
     });
 });
 
-function applyMask(video, canvas, maskIndex) {
-    const masks = [
-        computeFrameMask1,
-        computeFrameMask2,
-        computeFrameMask3,
-        // Define additional mask functions as needed
-    ];
 
-    if (maskIndex >= 0 && maskIndex < masks.length) {
-        masks[maskIndex](video, canvas); // Call the selected mask function
-    }
-}
+chrome.storage.sync.get('defaults', defaults => {
+    main(defaults.defaults);
+});
 
-// Example mask function
-function computeFrameMask1(video, canvas) {
-    width = video.videoWidth / 2;
-    height = video.videoHeight / 2;
-    ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, width, height);
-    frame = ctx.getImageData(0, 0, width, height);
-    const data = frame.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        const red = data[i + 0];
-        const green = data[i + 1];
-        const blue = data[i + 2];
-        if (green > 100 && red > 100 && blue > 100) {
-            data[i + 0] = 0;
-            data[i + 1] = 0;
-            data[i + 2] = 0;
-
-        }
-    }
-    ctx.putImageData(frame, 0, 0);
-}
-
-// Example mask function
-function computeFrameMask2(video, canvas) {
-    return computeFrameMask1(video, canvas);
-}
-
-function computeFrameMask3(video, canvas) {
-    return computeFrameMask1(video, canvas);
-}
 
 async function main(defaults) {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    let extensionEnabled = true; // Default to true, but you should load this from storage
-    chrome.storage.sync.get('extensionEnabled', function(data) {
-        extensionEnabled = data.extensionEnabled !== undefined ? data.extensionEnabled : true;
-    });
-
-    let maskIndex = 0;
-
     const videoList = [];
-
     chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
         if (request.greeting === "videos") {
             sendResponse({ greeting: 'success' });
@@ -104,114 +49,142 @@ async function main(defaults) {
 
     chrome.scripting.executeScript({
         target: { tabId: tab.id, allFrames: true },
-        function: videoProcessingFunction, // Defined outside to keep this cleaner
-        args: [maskIndex, extensionEnabled], // Pass maskIndex and extensionEnabled as arguments
+        function: () => {
+            function mapVid(vid, index) {
+                return vid;
+            }
+            const vids = Array.from(document.querySelectorAll("video")).map(mapVid);
+            chrome.runtime.sendMessage({ greeting: "videos", videos: vids });
+        },
     }, _ => !chrome.runtime.lastError || console.log("Error(getVids):", chrome.runtime.lastError));
 
     // Wait to find videos before informing the user
     await new Promise(resolve => setTimeout(resolve, 1000));
     if (videoList.length === 0) {
-        // videosListEl.classList.add("noVidsFound");
-        // videosListEl.innerHTML = `No videos found on page! <br> If there is one, use the feedback button on the options page!`;
+        // TODO: display it in the popup
+        console.log("No videos found on the page.");
     }
+
+    function addVideoEffects() {
+        // Update each video
+        let maskFunctionIdx = 0;
+        let extensionEnabled = document.getElementById('extensionToggle').classList.contains('on');
+
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id, allFrames: true },
+            function: videoProcessingFunction, // Defined outside to keep this cleaner
+            args: [extensionEnabled, maskFunctionIdx], // Pass maskIndex and extensionEnabled as arguments
+        }, _ => !chrome.runtime.lastError || console.log("Error(getVids):", chrome.runtime.lastError));
+
+        requestAnimationFrame(addVideoEffects);
+    }
+
+    requestAnimationFrame(addVideoEffects);
 }
 
-chrome.storage.sync.get('defaults', defaults => {
-    main(defaults.defaults);
-});
 
+function videoProcessingFunction(extensionEnabled, maskFunctionIdx) {
 
-function videoProcessingFunction(maskIndex) {
-    chrome.storage.sync.get('extensionEnabled', function(data) {
-        const extensionEnabled = data.extensionEnabled !== undefined ? data.extensionEnabled : true;
-        updateExtensionState(extensionEnabled); // Enable functionality
-    });
-
-    function updateExtensionState(isEnabled) {
-        extensionEnabled = isEnabled;
-        document.querySelectorAll('video').forEach(video => {
-            let canvasContainer = video.nextElementSibling;
-            if (isEnabled) {
-                if (!canvasContainer || !canvasContainer.classList.contains('video-canvas-container')) {
-                    console.log("Extension is enabled. Setting up...");
-                    const canvas = overlayCanvasOnVideo(video);
-                    applyEffectToCanvas(canvas, maskIndex);
-                }
-            } else if (canvasContainer && canvasContainer.classList.contains('video-canvas-container')) {
-                console.log("Extension is disabled.");
-                canvasContainer.remove(); // Remove the canvas container if the extension is disabled
-            }
-        });
-    }
-
-    function overlayCanvasOnVideo(video) {
-        let container = video.closest('.video-canvas-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'video-canvas-container';
-            video.parentNode.insertBefore(container, video);
-            container.appendChild(video);
-        }
-
-        container.style.position = 'relative';
-        container.style.display = 'inline-block';
-
-        let canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth / 2;
-        canvas.height = video.videoHeight / 2;
-        canvas.style.position = 'absolute';
-        canvas.style.left = '0';
-        canvas.style.top = '0';
-        canvas.style.pointerEvents = 'none';
-        container.appendChild(canvas);
-
-        return canvas;
-    }
-
-    function applyEffectToCanvas(canvas, maskIndex) {
-        const ctx = canvas.getContext('2d');
-        const video = canvas.parentNode.querySelector('video');
-
-        // video.addEventListener('play', function() {
-            
-        // });
-        drawVideoWithEffect(video, canvas, ctx, maskIndex);
-    }
-
-    function drawVideoWithEffect(video, canvas, ctx, maskIndex) {
-        if (video.paused || video.ended) return;
-
-        console.log(extensionEnabled);
-        if (!extensionEnabled) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            return;
+    // 0. Define helper functions
+    function setCanvasSize(canvas, video, maxWidth=800) {
+        // Ensure the video's metadata is loaded to get its natural dimensions
+        if (video.readyState >= 1) {
+            resizeCanvas(); // Video metadata is ready, resize immediately
         } else {
-            console.log("Yo, I am here too!");
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Example effect: adjust brightness based on maskIndex
-            // More complex effects and masks can be applied here based on actual use cases
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                // Simple brightness effect
-                // data[i] = data[i] * (1 + maskIndex * 0.1); // Red
-                // data[i + 1] = data[i + 1] * (1 + maskIndex * 0.1); // Green
-                // data[i + 2] = data[i + 2] * (1 + maskIndex * 0.1); // Blue
-
-                const red = data[i + 0];
-                const green = data[i + 1];
-                const blue = data[i + 2];
-                if (green > 100 && red > 100 && blue > 100) {
-                    data[i + 0] = 0;
-                    data[i + 1] = 0;
-                    data[i + 2] = 0;
-
-                }
-            }
-            ctx.putImageData(imageData, 0, 0);
+            video.addEventListener('loadedmetadata', resizeCanvas); // Wait for metadata
         }
-        requestAnimationFrame(() => drawVideoWithEffect(video, canvas, ctx, maskIndex));
+    
+        function resizeCanvas() {
+            const videoAspectRatio = video.videoWidth / video.videoHeight;
+            let canvasWidth = video.videoWidth;
+            let canvasHeight = video.videoHeight;
+    
+            // Scale down if the video width is greater than maxWidth, maintaining aspect ratio
+            if (canvasWidth > maxWidth) {
+                canvasWidth = maxWidth;
+                canvasHeight = maxWidth / videoAspectRatio;
+            }
+    
+            // Set the canvas dimensions
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+    
+            // Use CSS to visually scale the canvas to match the video's offsetWidth
+            const scaleRatio = video.offsetWidth / canvasWidth;
+            canvas.style.transform = `scale(${scaleRatio})`;
+            canvas.style.transformOrigin = 'top left';
+    
+            // Adjust the canvas container size if necessary to fit the scaled canvas
+            canvas.style.width = `${canvasWidth}px`;
+            canvas.style.height = `${canvasHeight}px`;
+        }
+    }
+
+    // 1. Define all masks here
+    function computeFrameMask1(video, canvas) {
+        setCanvasSize(canvas, video);
+        const width = canvas.width;
+        const height = canvas.height;
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(video, 0, 0, width, height);
+        const frame = ctx.getImageData(0, 0, width, height);
+        const data = frame.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 1] > 100 && data[i] > 100 && data[i + 2] > 100) {
+                data[i] = data[i + 1] = data[i + 2] = 0;
+            } else {
+                data[i + 3] = 0; // Set alpha to 0
+            }
+        }
+        ctx.putImageData(frame, 0, 0);
+    }
+    
+    let maskFuntions = [computeFrameMask1];
+
+    // 2. Process each video
+    document.querySelectorAll('video').forEach(processOneVideo);
+
+    function processOneVideo(video) {
+        let canvas = null;
+
+        // 2.1 Delete or create canvas if video is present
+        let canvasContainer = video.parentNode;
+        if (extensionEnabled) {
+            if (!canvasContainer || !canvasContainer.classList.contains('video-canvas-container')) {
+                // Create a canvas and overlay it on the video
+                console.log("Extension is enabled. Setting up canvas");
+
+                container = document.createElement('div');
+                container.className = 'video-canvas-container';
+                video.parentNode.insertBefore(container, video);
+                container.appendChild(video);
+
+                container.style.position = 'relative';
+                container.style.display = 'inline-block';
+
+                canvas = document.createElement('canvas');
+                canvas.style.position = 'absolute';
+                canvas.style.left = '0';
+                canvas.style.top = '0';
+                canvas.style.pointerEvents = 'none';
+                container.appendChild(canvas);
+
+            } else {
+                // Canvas already exists
+                canvas = canvasContainer.querySelector('canvas');
+            }
+            // 2.2 Apply effect only if the video is playing
+            if (!video.paused && !video.ended) {
+                requestAnimationFrame(() => maskFuntions[maskFunctionIdx](video, canvas));
+            }
+        } else if (canvasContainer && canvasContainer.classList.contains('video-canvas-container')) {
+            // Remove the canvas container if the extension is disabled
+            console.log("Extension is disabled. Cleaning canvas");
+            canvasContainer.parentNode.appendChild(video);
+            canvasContainer.remove();
+        }
     }
 }
 
