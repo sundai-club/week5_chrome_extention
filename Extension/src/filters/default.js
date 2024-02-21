@@ -1,8 +1,6 @@
-function tresholdFilter(video, canvas, {threshold = [100, 100, 100]} = {}) {
-    setCanvasSize(canvas, video);
+function tresholdFilter(video, canvas, ctx, {threshold = [100, 100, 100]} = {}) {
     const width = canvas.width;
     const height = canvas.height;
-    const ctx = canvas.getContext("2d");
 
     ctx.drawImage(video, 0, 0, width, height);
     const frame = ctx.getImageData(0, 0, width, height);
@@ -18,9 +16,7 @@ function tresholdFilter(video, canvas, {threshold = [100, 100, 100]} = {}) {
     ctx.putImageData(frame, 0, 0);
 }
 
-function grayscaleFilter(video, canvas) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
+function grayscaleFilter(video, canvas, ctx) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -35,9 +31,7 @@ function grayscaleFilter(video, canvas) {
     ctx.putImageData(frame, 0, 0);
 }
 
-function invertColorsFilter(video, canvas) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
+function invertColorsFilter(video, canvas, ctx) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -52,9 +46,7 @@ function invertColorsFilter(video, canvas) {
 }
 
 
-function sepiaFilter(video, canvas) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
+function sepiaFilter(video, canvas, ctx) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -71,9 +63,7 @@ function sepiaFilter(video, canvas) {
     ctx.putImageData(frame, 0, 0);
 }
 
-function posterizeFilter(video, canvas, {levels = 5} = {}) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
+function posterizeFilter(video, canvas, ctx, {levels = 5} = {}) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -92,9 +82,7 @@ function posterizeFilter(video, canvas, {levels = 5} = {}) {
 }
 
 
-function vignetteFilter(video, canvas) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
+function vignetteFilter(video, canvas, ctx) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const centerX = canvas.width / 2;

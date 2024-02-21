@@ -14,8 +14,6 @@ const maskFuntions = {
 };
 
 
-function emptyFilter(video, canvas) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
+function emptyFilter(video, canvas, ctx) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 }

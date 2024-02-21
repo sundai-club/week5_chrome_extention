@@ -72,9 +72,9 @@ function processOneVideo(video) {
         // 3.2 Apply effect only if the video is playing
         if (!video.paused && !video.ended) {
             requestAnimationFrame(() => {
-                maskFuntions[currentMaskFunctionId](video, canvas, currentMaskArgs);
-                // wait to limit FPS
-                
+                setCanvasSize(canvas, video);
+                const ctx = canvas.getContext("2d", { willReadFrequently: true });
+                maskFuntions[currentMaskFunctionId](video, canvas, ctx, currentMaskArgs);
             });
         }
     } else if (canvasContainer && canvasContainer.classList.contains('video-canvas-container')) {
@@ -86,8 +86,13 @@ function processOneVideo(video) {
 }
 
 function videoUpdateLoop() {
+    let FPS_LIMIT = 30;
     document.querySelectorAll('video').forEach(processOneVideo);
-    requestAnimationFrame(videoUpdateLoop); // Continue the loop
+    setTimeout(() => {
+        requestAnimationFrame(videoUpdateLoop);
+    }, 1000 / FPS_LIMIT);
 }
 
-requestAnimationFrame(videoUpdateLoop); // Start the loop
+window.addEventListener('load', function() {
+    requestAnimationFrame(videoUpdateLoop);
+});

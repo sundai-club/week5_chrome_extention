@@ -41,19 +41,22 @@ async function injectMediaPipe(lib_url, models_url, debug=false) {
     window.postMessage({ type: 'faceLandmarkerReady'}, '*');
 
     // Add even listener to communicate with the content script
-    document.addEventListener('runFaceLandmarker', async (e) => {
+    document.addEventListener('runMediaPipe', async (e) => {
+        let results = null;
+
         if (!window.faceLandmarker || !e.detail.video_class) {
             if (debug) console.error('webpage: faceLandmarker or video element not found.');
             return;
         }
         try {
-            const video = document.querySelector(`.${e.detail.video_class}`);
+            const video = document.getElementById(e.detail.video_class).querySelector('video');
             if (debug) console.log('Running faceLandmarker');
-            const results = await window.faceLandmarker.detect(video);
-            window.postMessage({ type: 'faceLandmarkerResults', data: results }, '*');
+            results = await window.faceLandmarker.detect(video);
         } catch (error) {
             if (debug) console.error('Error running faceLandmarker:', error);
         }
+
+        window.postMessage({ type: 'mediaPipeResults', data: results }, '*');
     });
 };
 

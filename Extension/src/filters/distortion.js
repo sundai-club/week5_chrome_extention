@@ -1,11 +1,10 @@
 
-function wavyDistortionFilter(video, canvas, {amplitude=5., dynamic=true, speed=1.} = {}) {
-    let time = 0.; 
+function wavyDistortionFilter(video, canvas, ctx, {amplitude=5., dynamic=true, speed=1.} = {}) {
+    let time = 0.;
     if (dynamic) time = new Date().getTime() * 0.002 * speed;
 
     amplitude *= 20;
 
-    const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const output = new ImageData(canvas.width, canvas.height); // Create a new ImageData object for the output
@@ -35,9 +34,7 @@ function wavyDistortionFilter(video, canvas, {amplitude=5., dynamic=true, speed=
     ctx.putImageData(output, 0, 0);
 }
 
-function pixelationFilter(video, canvas, {pixelSize = 10} = {}) {
-    const ctx = canvas.getContext("2d");
-
+function pixelationFilter(video, canvas, ctx, {pixelSize = 10} = {}) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const width = canvas.width / pixelSize;
     const height = canvas.height / pixelSize;
@@ -62,10 +59,7 @@ function pixelationFilter(video, canvas, {pixelSize = 10} = {}) {
 }
 
 
-function centralDistortionFilter(video, canvas, {distortionStrength=1, effectRadius=100} = {}) {
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
-
+function centralDistortionFilter(video, canvas, ctx, {distortionStrength=1, effectRadius=100} = {}) {
     // Draw the video frame to the canvas.
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);

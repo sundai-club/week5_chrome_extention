@@ -1,7 +1,5 @@
-async function imageFrameFilter(video, canvas, {imageUrl = "", maintain_aspect_ratio = false, scale = 1.0, deleteWhite=true} = {}) {
+async function imageFrameFilter(video, canvas, ctx, {imageUrl = "", maintain_aspect_ratio = false, scale = 1.0, deleteWhite=true} = {}) {
     if (!imageUrl) return;
-    setCanvasSize(canvas, video);
-    const ctx = canvas.getContext("2d");
 
     if (debug) console.log("Loading image frame from: ", imageUrl);
     const image = await getCachedImage(imageUrl).catch(console.error);

@@ -3,20 +3,24 @@ RIGHT_EYE_IDX = 473;
 NOSE_IDX = 4;
 MOUTH_IDX = 14;
 
-async function baseFaceFilter(video, canvas, callback, callback_args) {
+async function baseFaceFilter(video, canvas, ctx, callback, callback_args) {
+    if (!MEDIA_PIPE_LOADED) return;
+
     // It has to be a non-blocking promise to not spam the requests
     return new Promise((resolve, reject) => {
-        // Set up randomized class name
+        // Set up randomized class name so that the webpage knows which video to process
         const class_name = `to-detect-${Math.random().toString(36).substring(7)}`;
-        video.classList.add(class_name);
+        video.parentNode.id = class_name;
 
         // Event listener to handle faceLandmarker results
         const handleResults = (event) => {
-            if (event.source === window && event.data.type === 'faceLandmarkerResults') {
+            if (event.source === window && event.data.type === 'mediaPipeResults') {
                 if (debug) console.log('content: Received faceLandmarker results', event.data.data);
-                callback(video, canvas, event.data.data, callback_args);
-                video.classList.remove(class_name); // Clean up: remove class name
+                callback(video, canvas, ctx, event.data.data, callback_args);
+                
+                video.parentNode.id = ''; // Clean up: remove class name
                 window.removeEventListener('message', handleResults); // Remove event listener to avoid leaks
+                if (debug) console.log('content: promise released');
                 resolve(); // Resolve the promise
             }
         };
@@ -24,14 +28,14 @@ async function baseFaceFilter(video, canvas, callback, callback_args) {
         window.addEventListener('message', handleResults);
 
         // Dispatch event to request faceLandmarker processing
-        const event = new CustomEvent('runFaceLandmarker', { detail: { video_class: class_name } });
+        const event = new CustomEvent('runMediaPipe', { detail: { video_class: class_name } });
         document.dispatchEvent(event);
         if (debug) console.log('content: faceLandmarker event dispatched');
     });
 }
 
-async function drawLandmarks(video, canvas, callback_args) {
-    function callback(video, canvas, results, {color="red"} = {}) {
+async function drawLandmarks(video, canvas, ctx, callback_args) {
+    function callback(video, canvas, ctx, results, {color="red"} = {}) {
         function connect_two_idxs(ctx, pt1, pt2, landmarks) {
             ctx.beginPath();
             ctx.moveTo(landmarks[pt1].x * canvas.width, landmarks[pt1].y * canvas.height);
@@ -39,8 +43,6 @@ async function drawLandmarks(video, canvas, callback_args) {
             ctx.stroke();
         }
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
 
@@ -51,5 +53,5 @@ async function drawLandmarks(video, canvas, callback_args) {
         }
     }
     
-    await baseFaceFilter(video, canvas, callback, callback_args);
+    await baseFaceFilter(video, canvas, ctx, callback, callback_args);
 }
