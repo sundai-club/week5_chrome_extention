@@ -10,7 +10,8 @@ const maskFuntions = {
     "wavy": wavyDistortionFilter,
     "pixelation": pixelationFilter,
     "centralDistortion": centralDistortionFilter,
-    "faceMesh": drawLandmarks,
+    "landmarkDetectorDemo": landmarkDetectorDemo,
+    "faceDetectorDemo": faceDetectorDemo,
 };
 
 

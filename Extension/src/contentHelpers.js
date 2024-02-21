@@ -1,4 +1,4 @@
-const debug = false;
+const debug = true;
 
 async function loadImage(url) {
     return new Promise((resolve, reject) => {

@@ -9,7 +9,8 @@ class Filter {
 
 const filterGrid = [
     new Filter('None', 'empty.png', 'default', {}),
-    new Filter('Face Mesh', 'mask1.png', 'faceMesh', {}),
+    new Filter('Face Detector Demo', 'face_detector.png', 'faceDetectorDemo', {}),
+    new Filter('Landmark Detector Demo', 'landmark_detector.png', 'landmarkDetectorDemo', {}),
     new Filter('Grayscale', 'grayscale.png', 'grayscale', {}),
     new Filter('Invert Colors', 'invert.png', 'invertColors', {}),
     new Filter('Sepia', 'sepia.png', 'sepia', {}),

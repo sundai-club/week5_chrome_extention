@@ -3,7 +3,7 @@ RIGHT_EYE_IDX = 473;
 NOSE_IDX = 4;
 MOUTH_IDX = 14;
 
-async function baseFaceFilter(video, canvas, ctx, callback, callback_args) {
+async function baseFaceFilter(model_name, video, canvas, ctx, callback, callback_args) {
     if (!MEDIA_PIPE_LOADED) return;
 
     // It has to be a non-blocking promise to not spam the requests
@@ -28,14 +28,15 @@ async function baseFaceFilter(video, canvas, ctx, callback, callback_args) {
         window.addEventListener('message', handleResults);
 
         // Dispatch event to request faceLandmarker processing
-        const event = new CustomEvent('runMediaPipe', { detail: { video_class: class_name } });
+        const event = new CustomEvent('runMediaPipe', { detail: { video_class: class_name, model_name: model_name} });
         document.dispatchEvent(event);
         if (debug) console.log('content: faceLandmarker event dispatched');
     });
 }
 
-async function drawLandmarks(video, canvas, ctx, callback_args) {
+async function landmarkDetectorDemo(video, canvas, ctx, callback_args) {
     function callback(video, canvas, ctx, results, {color="red"} = {}) {
+        if (results == null) return;
         function connect_two_idxs(ctx, pt1, pt2, landmarks) {
             ctx.beginPath();
             ctx.moveTo(landmarks[pt1].x * canvas.width, landmarks[pt1].y * canvas.height);
@@ -47,11 +48,40 @@ async function drawLandmarks(video, canvas, ctx, callback_args) {
         ctx.lineWidth = 2;
 
         for (let i = 0; i < results.faceLandmarks.length; i++) {
+            ctx.strokeStyle = color;
             connect_two_idxs(ctx, LEFT_EYE_IDX, NOSE_IDX, results.faceLandmarks[i]);
             connect_two_idxs(ctx, RIGHT_EYE_IDX, NOSE_IDX, results.faceLandmarks[i]);
+            ctx.strokeStyle = "green";
             connect_two_idxs(ctx, NOSE_IDX, MOUTH_IDX, results.faceLandmarks[i]);
         }
     }
     
-    await baseFaceFilter(video, canvas, ctx, callback, callback_args);
+    await baseFaceFilter("faceLandmarker", video, canvas, ctx, callback, callback_args);
+}
+
+
+async function faceDetectorDemo(video, canvas, ctx, callback_args) {
+    function callback(video, canvas, ctx, results, {color="red"} = {}) {
+        if (results == null) return;
+        function connect_two_idxs(ctx, pt1, pt2) {
+            ctx.beginPath();
+            ctx.moveTo(pt1.x * canvas.width, pt1.y * canvas.height);
+            ctx.lineTo(pt2.x * canvas.width, pt2.y * canvas.height);
+            ctx.stroke();
+        }
+
+        ctx.lineWidth = 2;
+
+        console.log(results);
+        for (let i = 0; i < results.detections.length; i++) {
+            ctx.strokeStyle = color;
+            dpp = results.detections[i].keypoints
+            connect_two_idxs(ctx, dpp[0], dpp[2]);
+            connect_two_idxs(ctx, dpp[1], dpp[2]);
+            ctx.strokeStyle = "green";
+            connect_two_idxs(ctx, dpp[3], dpp[2]);
+        }
+    }
+    
+    await baseFaceFilter("faceDetector", video, canvas, ctx, callback, callback_args);
 }

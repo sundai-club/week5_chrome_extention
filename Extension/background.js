@@ -1,4 +1,4 @@
-const debug = false;
+const debug = true;
 
 function sendMessageToContentScript(message) {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -27,16 +27,26 @@ async function injectMediaPipe(lib_url, models_url, debug=false) {
     let MediaPipeModule = await import(lib_url + '/vision_bundle.js');
     const VisionPathResolver = await MediaPipeModule.FilesetResolver.forVisionTasks(lib_url + "/wasm");
 
-    window.faceLandmarker = await MediaPipeModule.FaceLandmarker.createFromOptions(
+    window.models = {};
+    window.models['faceLandmarker'] = await MediaPipeModule.FaceLandmarker.createFromOptions(
         VisionPathResolver,
         {
             baseOptions: {
                 modelAssetPath: models_url + '/face_landmarker.task'
             } ,
-        runningMode: "IMAGE"
+        runningMode: "IMAGE",
+        num_faces: 4,
     });
+    window.models['faceDetector'] = await MediaPipeModule.FaceDetector.createFromOptions(
+        VisionPathResolver,
+        {
+            baseOptions: {
+                modelAssetPath: models_url + '/blaze_face_short_range.tflite'
+            },
+            runningMode: "IMAGE"
+        }
+    );
     
-
     if (debug) console.log('MediaPipe is sucsesfully loaded.');
     window.postMessage({ type: 'faceLandmarkerReady'}, '*');
 
@@ -44,16 +54,16 @@ async function injectMediaPipe(lib_url, models_url, debug=false) {
     document.addEventListener('runMediaPipe', async (e) => {
         let results = null;
 
-        if (!window.faceLandmarker || !e.detail.video_class) {
-            if (debug) console.error('webpage: faceLandmarker or video element not found.');
-            return;
-        }
-        try {
-            const video = document.getElementById(e.detail.video_class).querySelector('video');
-            if (debug) console.log('Running faceLandmarker');
-            results = await window.faceLandmarker.detect(video);
-        } catch (error) {
-            if (debug) console.error('Error running faceLandmarker:', error);
+        if (!window.models[e.detail.model_name] || !e.detail.video_class) {
+            if (debug) console.error('webpage: MediaPipe or video element not found.');
+        } else {
+            try {
+                const video = document.getElementById(e.detail.video_class).querySelector('video');
+                if (debug) console.log('Running MediaPipe model');
+                results = await window.models[e.detail.model_name].detect(video);
+            } catch (error) {
+                if (debug) console.error('Error running faceLandmarker:', error);
+            }
         }
 
         window.postMessage({ type: 'mediaPipeResults', data: results }, '*');
