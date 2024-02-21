@@ -1,5 +1,8 @@
 if (debug) console.log("contentScript.js is running");
 
+let MEDIA_PIPE_LOADED = false;
+let faceLandmarker = null;
+
 // 1. Set up the global variables
 let extensionEnabled = false;
 let currentMaskFunctionId = "default";
@@ -10,6 +13,7 @@ chrome.storage.sync.get(['extensionEnabled', 'currentMaskId', 'currentMaskArgs']
     currentMaskFunctionId = result.currentMaskId || "default";
     currentMaskArgs = result.currentMaskArgs || {};
 });
+
 
 // 2. Listen for messages from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -23,8 +27,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-// 3. Process each video
 
+// 3. Listen for messages from the webpage (to use MediaPipe)
+window.addEventListener('message', (event) => {
+    if (event.source === window && event.data.type === 'faceLandmarkerReady') {
+        console.log('Received faceLandmarkerReady');
+        MEDIA_PIPE_LOADED = true;
+    }
+});
+
+// 4. Process each video
 function processOneVideo(video) {
     let canvas = null;
 
@@ -59,7 +71,11 @@ function processOneVideo(video) {
         }
         // 3.2 Apply effect only if the video is playing
         if (!video.paused && !video.ended) {
-            requestAnimationFrame(() => maskFuntions[currentMaskFunctionId](video, canvas, currentMaskArgs));
+            requestAnimationFrame(() => {
+                maskFuntions[currentMaskFunctionId](video, canvas, currentMaskArgs);
+                // wait to limit FPS
+                
+            });
         }
     } else if (canvasContainer && canvasContainer.classList.contains('video-canvas-container')) {
         // Remove the canvas container if the extension is disabled
@@ -75,7 +91,3 @@ function videoUpdateLoop() {
 }
 
 requestAnimationFrame(videoUpdateLoop); // Start the loop
-
-
-
-
