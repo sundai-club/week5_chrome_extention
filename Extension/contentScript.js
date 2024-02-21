@@ -37,9 +37,8 @@ window.addEventListener('message', (event) => {
 });
 
 // 4. Process each video
+let canvas = null;
 function processOneVideo(video) {
-    let canvas = null;
-
     // 3.1 Delete or create canvas if video is present
     let canvasContainer = video.parentNode;
     if (extensionEnabled) {
@@ -64,7 +63,6 @@ function processOneVideo(video) {
             canvas.style.height = '100%'; // Match the video height within the container
             canvas.style.pointerEvents = 'none'; // Make sure it doesn't block interactions
             container.appendChild(canvas);
-
         } else {
             // Canvas already exists
             canvas = canvasContainer.querySelector('canvas');
@@ -72,7 +70,6 @@ function processOneVideo(video) {
         // 3.2 Apply effect only if the video is playing
         if (!video.paused && !video.ended) {
             requestAnimationFrame(() => {
-                setCanvasSize(canvas, video);
                 const ctx = canvas.getContext("2d", { willReadFrequently: true });
                 maskFuntions[currentMaskFunctionId](video, canvas, ctx, currentMaskArgs);
             });

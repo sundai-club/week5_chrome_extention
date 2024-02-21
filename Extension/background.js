@@ -1,4 +1,4 @@
-const debug = true;
+const debug = false;
 
 function sendMessageToContentScript(message) {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -43,7 +43,8 @@ async function injectMediaPipe(lib_url, models_url, debug=false) {
             baseOptions: {
                 modelAssetPath: models_url + '/blaze_face_short_range.tflite'
             },
-            runningMode: "IMAGE"
+            runningMode: "IMAGE",
+            minDetectionConfidence: 0.5
         }
     );
     

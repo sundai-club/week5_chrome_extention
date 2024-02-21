@@ -1,4 +1,5 @@
 function tresholdFilter(video, canvas, ctx, {threshold = [100, 100, 100]} = {}) {
+    setCanvasSize(canvas, video);
     const width = canvas.width;
     const height = canvas.height;
 
@@ -17,6 +18,7 @@ function tresholdFilter(video, canvas, ctx, {threshold = [100, 100, 100]} = {}) 
 }
 
 function grayscaleFilter(video, canvas, ctx) {
+    setCanvasSize(canvas, video);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -32,6 +34,7 @@ function grayscaleFilter(video, canvas, ctx) {
 }
 
 function invertColorsFilter(video, canvas, ctx) {
+    setCanvasSize(canvas, video);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -47,6 +50,7 @@ function invertColorsFilter(video, canvas, ctx) {
 
 
 function sepiaFilter(video, canvas, ctx) {
+    setCanvasSize(canvas, video);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -64,6 +68,7 @@ function sepiaFilter(video, canvas, ctx) {
 }
 
 function posterizeFilter(video, canvas, ctx, {levels = 5} = {}) {
+    setCanvasSize(canvas, video);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = frame.data;
@@ -83,6 +88,7 @@ function posterizeFilter(video, canvas, ctx, {levels = 5} = {}) {
 
 
 function vignetteFilter(video, canvas, ctx) {
+    setCanvasSize(canvas, video);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const centerX = canvas.width / 2;

@@ -1,4 +1,5 @@
 async function imageFrameFilter(video, canvas, ctx, {imageUrl = "", maintain_aspect_ratio = false, scale = 1.0, deleteWhite=true} = {}) {
+    setCanvasSize(canvas, video);
     if (!imageUrl) return;
 
     if (debug) console.log("Loading image frame from: ", imageUrl);

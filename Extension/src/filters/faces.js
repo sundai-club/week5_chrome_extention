@@ -16,6 +16,8 @@ async function baseFaceFilter(model_name, video, canvas, ctx, callback, callback
         const handleResults = (event) => {
             if (event.source === window && event.data.type === 'mediaPipeResults') {
                 if (debug) console.log('content: Received faceLandmarker results', event.data.data);
+                
+                setCanvasSize(canvas, video);
                 callback(video, canvas, ctx, event.data.data, callback_args);
                 
                 video.parentNode.id = ''; // Clean up: remove class name
@@ -44,9 +46,7 @@ async function landmarkDetectorDemo(video, canvas, ctx, callback_args) {
             ctx.stroke();
         }
 
-        ctx.strokeStyle = color;
         ctx.lineWidth = 2;
-
         for (let i = 0; i < results.faceLandmarks.length; i++) {
             ctx.strokeStyle = color;
             connect_two_idxs(ctx, LEFT_EYE_IDX, NOSE_IDX, results.faceLandmarks[i]);
@@ -71,8 +71,6 @@ async function faceDetectorDemo(video, canvas, ctx, callback_args) {
         }
 
         ctx.lineWidth = 2;
-
-        console.log(results);
         for (let i = 0; i < results.detections.length; i++) {
             ctx.strokeStyle = color;
             dpp = results.detections[i].keypoints
@@ -81,6 +79,17 @@ async function faceDetectorDemo(video, canvas, ctx, callback_args) {
             ctx.strokeStyle = "green";
             connect_two_idxs(ctx, dpp[3], dpp[2]);
         }
+    }
+    
+    await baseFaceFilter("faceDetector", video, canvas, ctx, callback, callback_args);
+}
+
+async function faceDistortion(video, canvas, ctx, callback_args) {
+    function callback(video, canvas, ctx, results, {center_point=2, distortion_kwargs={}} = {}) {
+        if (results == null) return;
+        
+        distortion_centers = results.detections.map(x => x.keypoints[center_point]);
+        centralDistortionFilter(video, canvas, ctx, {...distortion_kwargs, centers: distortion_centers});
     }
     
     await baseFaceFilter("faceDetector", video, canvas, ctx, callback, callback_args);
