@@ -82,6 +82,7 @@ function processOneVideo(video) {
     }
 }
 
+
 function videoUpdateLoop() {
     let FPS_LIMIT = 30;
     document.querySelectorAll('video').forEach(processOneVideo);

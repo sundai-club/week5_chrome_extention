@@ -1,4 +1,44 @@
 const debug = true;
+const socket = io('https://sundai-socket-io.glitch.me/');
+
+socket.on('connect', () => {
+    console.log('Connected to the server');
+    // Ready to receive messages
+});
+  
+socket.on('new message', (msg) => {
+    console.log('New message:', msg.message);
+
+    const filter = filterGrid.find(f => f.name === msg.message);
+
+    if (filter) {
+        chrome.runtime.sendMessage({type: "changeMask", maskId: filter.funcName, args: filter.args});
+
+        //selectedMask = document.querySelector('.selected');
+        //if (selectedMask) {
+        //    selectedMask.classList.remove('selected'); // Remove highlight from previously selected mask
+        //}
+        //maskItem.classList.add('selected'); // Highlight the new selection
+
+        if (debug) console.log('popup: Mask changed to', filter.name);
+    }
+});
+
+socket.on('disconnect', () => {
+    console.log('Disconnected from the server');
+});
+
+function selectFilter(funcName) {
+    // Assuming each filter's DOM element has an ID or data attribute that matches the filter's funcName
+    const filterElement = document.querySelector(`[data-func-name="${funcName}"]`);
+    if (filterElement) {
+        // If the filter element exists, simulate a click to select the filter
+        filterElement.click();
+        console.log(`Filter selected: ${funcName}`);
+    } else {
+        console.log(`No filter element found for ${funcName}`);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Init the state of the popup: toggle button
