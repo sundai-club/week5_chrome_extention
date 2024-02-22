@@ -14,7 +14,6 @@ chrome.storage.sync.get(['extensionEnabled', 'currentMaskId', 'currentMaskArgs']
     currentMaskArgs = result.currentMaskArgs || {};
 });
 
-
 // 2. Listen for messages from the background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "toggleState") {
@@ -26,7 +25,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (debug) console.log('content: Mask changed to', request.maskId);
     }
 });
-
 
 // 3. Listen for messages from the webpage (to use MediaPipe)
 window.addEventListener('message', (event) => {
