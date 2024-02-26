@@ -4,8 +4,7 @@
   "version": "0.0.1",
   "manifest_version": 3,
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
