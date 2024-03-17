@@ -82,7 +82,7 @@ function processOneVideo(video) {
 
 
 function videoUpdateLoop() {
-    let FPS_LIMIT = 30;
+    let FPS_LIMIT = 60;
     document.querySelectorAll('video').forEach(processOneVideo);
     setTimeout(() => {
         requestAnimationFrame(videoUpdateLoop);
