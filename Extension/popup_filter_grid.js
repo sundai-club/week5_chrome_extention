@@ -9,11 +9,20 @@ class Filter {
 
 const filterGrid = [
     new Filter('None', 'empty.png', 'default', {}),
+    new Filter('Shuffle', 'shuffle.png', 'shuffle', {upd_time: 5, filters_to_choose: [
+        new Filter('Tiny Face', 'tiny_face.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.1, distortionStrength: 2}}),
+        new Filter('Tiny Head', 'mask1.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.2, distortionStrength: 1}}),
+        new Filter('Big Head', 'big_head.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.4, distortionStrength: -0.4}}),
+        new Filter('Big Nose', 'big_nose.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.1, distortionStrength: -1}}),
+        new Filter('Big Mouth', 'big_mouth.png', 'faceDistortion', {center_point: 3, distortion_kwargs: {effectRadius: 0.1, distortionStrength: -1}}),
+        new Filter('Dizzy', 'dizzy.png', 'wavy', {'dynamic': true, 'speed':1.0, 'amplitude': 1.0}),
+        new Filter('Wavy', 'wavy.png', 'wavy', {'dynamic': false, 'amplitude': 2.0}),
+        new Filter('Pixelate', 'pixelate.png', 'pixelation', {}),
+    ]}),
     new Filter('Grayscale', 'grayscale.png', 'grayscale', {}),
     new Filter('Invert Colors', 'invert.png', 'invertColors', {}),
     new Filter('Sepia', 'sepia.png', 'sepia', {}),
     // new Filter('Comic Book', 'comic.png', 'comicBook', {}),
-
     new Filter('Tiny Face', 'tiny_face.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.1, distortionStrength: 2}}),
     new Filter('Tiny Head', 'mask1.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.2, distortionStrength: 1}}),
     new Filter('Big Head', 'big_head.png', 'faceDistortion', {center_point: 2, distortion_kwargs: {effectRadius: 0.4, distortionStrength: -0.4}}),
