@@ -1,6 +1,6 @@
 {
-  "name": "Sundai Video Filters",
-  "description": "Funny video filters in your browser",
+  "name": "SundAI Video Filters",
+  "description": "Messing up with videos in the browser",
   "version": "0.0.1",
   "manifest_version": 3,
   "background": {

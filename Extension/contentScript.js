@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // 3. Listen for messages from the webpage (to use MediaPipe)
 window.addEventListener('message', (event) => {
     if (event.source === window && event.data.type === 'faceLandmarkerReady') {
-        console.log('Received faceLandmarkerReady');
+        if (debug) console.log('Received faceLandmarkerReady');
         MEDIA_PIPE_LOADED = true;
     }
 });
