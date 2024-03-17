@@ -91,6 +91,7 @@ function vignetteFilter(video, canvas, ctx) {
     setCanvasSize(canvas, video);
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = Math.sqrt(centerX * centerX + centerY * centerY);

@@ -35,8 +35,13 @@ window.addEventListener('message', (event) => {
 });
 
 // 4. Process each video
-let canvas = null;
 function processOneVideo(video) {
+    let canvas = null;
+
+    if (video.readyState < 1) {
+        return;
+    }
+
     // 3.1 Delete or create canvas if video is present
     let canvasContainer = video.parentNode;
     if (extensionEnabled) {
@@ -65,6 +70,7 @@ function processOneVideo(video) {
             // Canvas already exists
             canvas = canvasContainer.querySelector('canvas');
         }
+        
         // 3.2 Apply effect only if the video is playing
         if (!video.paused && !video.ended) {
             requestAnimationFrame(() => {

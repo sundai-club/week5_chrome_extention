@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
             toggle.querySelector('.toggle-label').textContent = 'OFF';
         }
     });
-
+    
     // Construct the masks grid
     const masksGridcontainer = document.querySelector('.masks-grid');
     filterGrid.forEach((filter, idx) => {
