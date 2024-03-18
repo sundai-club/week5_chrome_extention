@@ -72,12 +72,12 @@ function processOneVideo(video) {
         }
         
         // 3.2 Apply effect only if the video is playing
-        if (!video.paused && !video.ended) {
-            requestAnimationFrame(() => {
-                const ctx = canvas.getContext("2d", { willReadFrequently: true });
-                maskFuntions[currentMaskFunctionId](video, canvas, ctx, currentMaskArgs);
-            });
-        }
+        // if (!video.paused && !video.ended) {
+        requestAnimationFrame(() => {
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            maskFuntions[currentMaskFunctionId](video, canvas, ctx, currentMaskArgs);
+        });
+        // }
     } else if (canvasContainer && canvasContainer.classList.contains('video-canvas-container')) {
         // Remove the canvas container if the extension is disabled
         if (debug) console.log("Extension is disabled. Cleaning canvas");

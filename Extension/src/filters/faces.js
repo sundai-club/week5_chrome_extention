@@ -85,12 +85,24 @@ async function faceDetectorDemo(video, canvas, ctx, callback_args) {
 }
 
 async function faceDistortion(video, canvas, ctx, callback_args) {
-    function callback(video, canvas, ctx, results, {center_point=2, distortion_kwargs={}} = {}) {
+    function callback(video, canvas, ctx, results, {center_point=2, effectRadius=0.2, distortion_kwargs={}} = {}) {
         if (results == null) return;
+
+        scales = results.faceLandmarks.map(detection => {
+            let scale = Math.sqrt(   (detection[MOUTH_IDX].x - detection[NOSE_IDX].x)**2 +
+                                    (detection[MOUTH_IDX].y - detection[NOSE_IDX].y)**2 );
+            return scale;
+        });
         
-        distortion_centers = results.detections.map(x => x.keypoints[center_point]);
+        distortion_centers = results.faceLandmarks.map((face, idx) => {
+            return {
+                x: face[center_point].x,
+                y: face[center_point].y,
+                radius: scales[idx] * effectRadius
+            };
+        });
         centralDistortionFilter(video, canvas, ctx, {...distortion_kwargs, centers: distortion_centers});
     }
-    
-    await baseFaceFilter("faceDetector", video, canvas, ctx, callback, callback_args);
+
+    await baseFaceFilter("faceLandmarker", video, canvas, ctx, callback, callback_args);
 }

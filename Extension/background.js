@@ -74,7 +74,7 @@ async function injectMediaPipe(lib_url, models_url, debug=false) {
 
 let injectedTabs = {};
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status === 'complete' && tab.url && !injectedTabs[tabId]) {
+    if (changeInfo.status === 'complete' && tab.url) {
         injectedTabs[tabId] = true;
         lib_url = chrome.runtime.getURL("src/thirdparty/mediapipe/task_vision");
         models_url = chrome.runtime.getURL("data/models/");

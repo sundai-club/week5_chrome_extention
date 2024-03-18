@@ -60,16 +60,15 @@ function pixelationFilter(video, canvas, ctx, {pixelSize = 10} = {}) {
     }
 }
 
-function centralDistortionFilter(video, canvas, ctx, {distortionStrength=1, effectRadius=0.1, centers=[{x: 0.5, y: 0.5}]} = {}) {
+function centralDistortionFilter(video, canvas, ctx, {distortionStrength=1, centers=[{x: 0.5, y: 0.5, radius: 0.3}]} = {}) {
     setCanvasSize(canvas, video);
     if (centers.length === 0) return;
-    effectRadius *= Math.max(canvas.width, canvas.height);
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const output = ctx.createImageData(canvas.width, canvas.height);
 
-    centers = centers.map(center => ({ x: center.x * canvas.width, y: center.y * canvas.height }));
+    centers = centers.map(center => ({ x: center.x * canvas.width, y: center.y * canvas.height, radius: center.radius * Math.max(canvas.width, canvas.height)}));
     for (let y = 0; y < canvas.height; y++) {
         for (let x = 0; x < canvas.width; x++) {
             let closestCenter = centers[0];
@@ -87,9 +86,9 @@ function centralDistortionFilter(video, canvas, ctx, {distortionStrength=1, effe
             const dx = x - closestCenter.x;
             const dy = y - closestCenter.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            const normalizedDistance = distance / effectRadius;
+            const normalizedDistance = distance / closestCenter.radius;
 
-            if (distance < effectRadius) {
+            if (distance < closestCenter.radius) {
                 const distortion = distortionStrength * Math.pow(1 - normalizedDistance, 2);
                 const distortedDistance = distance * (1 + distortion);
 
