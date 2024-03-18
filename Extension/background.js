@@ -35,7 +35,7 @@ async function injectMediaPipe(lib_url, models_url, debug=false) {
                 modelAssetPath: models_url + '/face_landmarker.task'
             } ,
         runningMode: "IMAGE",
-        num_faces: 4,
+        numFaces: 4,
     });
     window.models['faceDetector'] = await MediaPipeModule.FaceDetector.createFromOptions(
         VisionPathResolver,
