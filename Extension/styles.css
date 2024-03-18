@@ -105,8 +105,8 @@ h1, h2, h3 {
 }
 
 .mask-item img {
-  max-width: 80%;
-  max-height: 80%;
+  max-width: 98%;
+  max-height: 98%;
 }
 
 .mask-item .mask-name {
@@ -118,7 +118,7 @@ h1, h2, h3 {
   color: #fff;
   font-size: 12px;
   padding: 2px 0;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 0px 0px;
   display: none; /* Hide mask names by default */
 }
 
